@@ -1,0 +1,9 @@
+README.md
+setup.py
+serverless-sqlalchemy-logapi/__init__.py
+serverless_sqlalchemy_logapi.egg-info/PKG-INFO
+serverless_sqlalchemy_logapi.egg-info/SOURCES.txt
+serverless_sqlalchemy_logapi.egg-info/dependency_links.txt
+serverless_sqlalchemy_logapi.egg-info/not-zip-safe
+serverless_sqlalchemy_logapi.egg-info/requires.txt
+serverless_sqlalchemy_logapi.egg-info/top_level.txt

@@ -1,0 +1,52 @@
+service: LogApis
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  stage: ${opt:stage}
+
+  httpApi:
+    authorizers:
+      someJwtAuthorizerFcc:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: https://cognito-idp.${aws:region}.amazonaws.com/${self:params.envSecret.cognitoPoolId}
+        audience: ${self:params.envSecret.clienteId}
+    cors: true
+
+  vpc:
+    securityGroupIds:
+      - ${self:params.envSecret.securityGroupId}
+    subnetIds:
+      - ${self:params.envSecret.subnetId1}
+      - ${self:params.envSecret.subnetId2}
+
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    API_GATEWAY_BASE_PATH: ${self:custom.customDomain.basePath}
+
+custom:
+  customDomain:
+    basePath: s${opt:stage}/v1
+    domainName: allianz.red5g.co
+    stage: ${opt:stage}
+    createRoute53Record: true
+
+params:
+  envSecret: ${ssm:/aws/reference/secretsmanager/${self:provider.stage}/secret-fcc}
+
+functions:
+  log:
+    handler: handler.log
+    events:
+      - httpApi:
+          path: /${opt:stage}/v1/
+          method: get
+
+plugins:
+  # - serverless-python-requirements
+  - serverless-offline
+  # - serverless-wsgi
