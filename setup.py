@@ -13,7 +13,7 @@ setup(name='Log_Api',
       author_email='fabianlozano044@gmail.com',
       license='MIT',
       py_modules=['aws_handler_decorators'],
-      packages=['Log_Api', 'Log_Api.Models', 'Log_Api.Class'],
+      packages=['Log_Api', 'Log_Api.Models', 'Log_Api.Class', 'Log_Api.Utils'],
       install_requires=['SQLAlchemy', 'pymysql',
                         'jsonschema', 'boto3', 'urllib3'],
       zip_safe=False)

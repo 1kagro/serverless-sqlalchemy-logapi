@@ -2,8 +2,8 @@ from Utils.Aws import Aws
 
 class Template:
     
-    def __init__(self, template_name):
-        __s3 = Aws.get_secret('s3-fcc')
+    def __init__(self, template_name, bucket_secret_name: str):
+        __s3 = Aws(bucket_secret_name).get_secret()
         self.template_name = template_name
         self.template_path = f"Templates/{self.template_name}"
         self.template_path_aws = f"{__s3['template_email_folder']}/{self.template_name}"

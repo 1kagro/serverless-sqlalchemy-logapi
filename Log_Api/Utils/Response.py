@@ -1,6 +1,4 @@
 import json
-
-# Clase encargada de dar la respuesta aws
 class Response:
 
     @classmethod

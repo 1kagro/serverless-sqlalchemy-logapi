@@ -41,7 +41,6 @@ class Model:
             def __init__(self, table_name):
                 self.__tablename__ = table_name
 
-            @classmethod
             def get_id(self, name: str, session):
                 """
                 Obtiene el id del registro a partir del nombre
@@ -61,7 +60,6 @@ class Model:
                 # print(data.id_table)
                 return id_table
             
-            @classmethod
             def get_id_code(self, code: str, session):
                 """
                 Obtiene el id del registro a partir del código
