@@ -1,5 +1,0 @@
-SQLAlchemy
-pymysql
-jsonschema
-boto3
-urllib3

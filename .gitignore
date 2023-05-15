@@ -1,0 +1,6 @@
+__pycache__
+build
+dist
+Log_Api.egg-info
+serverless_log_api.egg-info
+serverless_sqlalchemy_logapi.egg-info
