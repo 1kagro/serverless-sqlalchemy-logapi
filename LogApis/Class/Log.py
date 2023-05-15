@@ -25,7 +25,8 @@ class Log(Response):
             
             limit = int(limit) if limit else None
             offset = int(offset) if offset else None
-            offset = 0 if (offset - 1) < 0 else (offset - 1)
+            if offset:
+                offset = 0 if (offset - 1) < 0 else (offset - 1)
             if filter:
                 for key, value in filter.items():
                     if key in ['limit', 'offset']: continue
@@ -44,7 +45,7 @@ class Log(Response):
             return Log.bad_request(e.__str__())
         except Exception as e:
             traceback.print_exc()
-            raise e(f'Error en la consulta de logs: {e}')
+            raise Exception(f'Error en la consulta de logs: {e}')
         finally:
             session.invalidate()
             session.close()

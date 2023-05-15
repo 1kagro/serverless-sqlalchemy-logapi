@@ -1,6 +1,6 @@
 from json import dumps
 from .Database import Database, IntegrityError
-from ..Models.LogAPI import LogAPI
+from .LogAPI import LogAPI
 
 def log_resquest_response(api_func):
     def wrapper(*args, **kwargs):
