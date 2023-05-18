@@ -1,9 +1,5 @@
 from setuptools import setup
-# import sys
-# sys.path.append('Log_Api')
-# from Log_Api.Class.LogAPI import log_resquest_response
 import aws_handler_decorators
-# from Log_Api.Class.LogAPI import log_resquest_response
 
 setup(name='Log_Api',
       version=aws_handler_decorators.__version__,

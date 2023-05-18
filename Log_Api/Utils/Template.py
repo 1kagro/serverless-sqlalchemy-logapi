@@ -1,4 +1,4 @@
-from Utils.Aws import Aws
+from ..Utils import Aws
 
 class Template:
     

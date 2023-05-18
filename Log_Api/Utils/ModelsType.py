@@ -1,6 +1,6 @@
 import json
 from sqlalchemy import Column, Integer, String, sql
-from Class.Database import declarative_base as BASE
+from ..Class.Database import declarative_base as BASE
 
 class Model:
     """

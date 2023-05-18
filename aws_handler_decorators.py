@@ -26,7 +26,7 @@ except NameError:
 
 logger = logging.getLogger(__name__)
 
-__version__ = '0.0.3'
+__version__ = '0.0.6'
 
 class AwsHandlerDecorator(object):
     def __init__(self, func):
@@ -256,10 +256,12 @@ def load_json_queryStringParameters(handler):
                     event["queryStringParameters"] = evaluate_items(event["queryStringParameters"])
             except Exception as exception:
                 return {"statusCode": 400, "body": str(exception)}
+        elif isinstance(event.get("queryStringParameters"), dict) and event.get("body") in [None, {}]:
+            event["body"] = event.get("queryStringParameters", {})
         return handler(event, context)
     return wrapper
 
-def json_schema_validator(request_schema=None, document=None, body=True):
+def json_schema_validator(request_schema=None, document=None, body=True, in_file=False):
     """
     Decorator to validate the request for a API Gateway event.
     Validate the request against the schema passed as `request_schema` parameter
@@ -276,7 +278,9 @@ def json_schema_validator(request_schema=None, document=None, body=True):
                                 document_name = handler.__name__
                             else:
                                 document_name = document
-                            validate(request_data, schema_data[document_name])
+                            if in_file == False:
+                                schema_data = schema_data[document_name]
+                            validate(request_data, schema_data)
                     except ValidationError as ex:
                         error_path = ".".join(str(path) for path in ex.path)
                         error_message = f"Validation error at field '{error_path}': {ex.message}"

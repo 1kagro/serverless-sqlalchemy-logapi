@@ -97,21 +97,42 @@ class Aws:
             InvocationType=inv_type
         )
 
+        if inv_type == 'RequestResponse':
+            response = cls.get_data_from_response(response)
         return response
 
     @classmethod
-    def funciton_name(cls, function: str, service: str, stage=os.getenv('STAGE'), app=os.getenv('APP', '')):
+    def get_data_from_response(cls, response):
+        """
+        Obtener datos de la respuesta de la función lambda
+        :param: response
+            respuesta de la función lambda
+        :return: data
+        """
+        response_document = response['Payload'].read().decode('utf-8')
+        response_document = json.loads(response_document)
+        response_body = json.loads(response_document['body'])
+
+        return response_body
+    
+    @classmethod
+    def function_name(cls, function: str, service: str='', stage=os.getenv('STAGE'), ext_app=False):
         """
         Crea nombre de función lambda
         :param: function
             nombre de la función
         :param: stage
             nombre del stage
-        :param: app
-            nombre de la aplicación
+        :param: ext_app
+            si es una aplicación externa
         :return: function_name
         """
-        return f"{app}-{service}-{stage}-{function}"
+        if ext_app == False:
+            service = os.getenv('SERVICE', '')
+        
+        if service == '':
+            raise Exception("No se ha definido el nombre del servicio en la variable de entorno SERVICE")
+        return f"{service}-{stage}-{function}"
     
     def put_in_s3(self, file_name: str, file_path: str):
         """
