@@ -62,7 +62,7 @@ CREATE TABLE `LOG_APIS` (
   `TIME` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT 'Fecha en la que se ejecuto la api',
   `VERSION` VARCHAR(50) DEFAULT NULL COMMENT 'Version de la respuesta',
   `CREATED_AT` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creacion del registro',
-  `UPDATED_AT` TIMESTAMP NULL DEFAULT NULL COMMENT 'Fecha en la que se actualizo el registro',
+  `UPDATED_AT` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha en la que se actualizo el registro',
   PRIMARY KEY (`ID`)
 ) ENGINE=INNODB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 
