@@ -3,6 +3,7 @@ import json
 import boto3
 import base64
 import logging
+from datetime import datetime
 from botocore.exceptions import NoCredentialsError
 from botocore.exceptions import ClientError
 
@@ -183,6 +184,31 @@ class Aws:
             s3_client.delete_object(Bucket=bucket_name, Key=file_path)
         except FileNotFoundError:
             raise ValueError("Error al eliminar el archivo")
+        except NoCredentialsError:
+            raise ValueError("Credenciales invalidas")
+        except Exception as e:
+            raise e
+    
+    def upload_fileobj(self, file_route, filename):
+        """
+        Subir archivo a S3
+        :param: file 
+            archivo a subir (BufferedReader)
+        :param: filename
+            nombre del archivo, debe tener esta estructura:
+                carpeta/nombre_archivo.extension
+        """
+        try:
+            filename = f"{datetime.now().strftime('%d-%m-%Y')}_{filename}"
+            secrets = self.get_secret()
+
+            bucket_name = secrets["bucket_name"]
+
+            s3_client = boto3.client('s3')
+            with open(file_route, 'rb') as file:
+                s3_client.upload_fileobj(file, bucket_name, filename)
+        except FileNotFoundError:
+            raise ValueError("Error al guardar el archivo")
         except NoCredentialsError:
             raise ValueError("Credenciales invalidas")
         except Exception as e:
