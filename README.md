@@ -1,4 +1,4 @@
-# Hace mas facil la creacion de un API REST con Python y serverless AWS
+# It makes it easier to create a REST API with Python and AWS serverless.
 
 Included Decorators:
 --------------------
@@ -20,8 +20,55 @@ for common usecases when using AWS Lambda with Python.
 Installation:
 -------------
 ```bash
-pip install aws-handler-decorators
+pip install Log-Api
 ```
+
+Usage:
+------
+
+#### load_json_body
+```python
+from aws_handler_decorators import load_json_body
+
+@load_json_body
+def handler(event, context):
+    # event['body'] is now a python object
+    return event['body']['foo']
+
+handler({'body': '{"foo": "bar"}'}, object())
+```
+
+#### json_schema_validator
+You can use to validate the request. The schema is a JSON object or a path to a JSON file.
+
+```python
+from aws_handler_decorators import json_schema_validator
+@json_schema_validator(request_schema={
+    'type': 'object',
+    'properties': {
+        'foo': {'type': 'string'}
+    },
+    'required': ['foo']
+})
+def handler(event, context):
+    # event['body'] is now a python object
+    return event['body']['foo']
+
+handler({'body': '{"foo": "bar"}'}, object())
+
+@json_schema_validator(request_schema='path/to/schema.json', in_file=True)
+def handler(event, context):
+    # event['body'] is now a python object
+    return event['body']['foo']
+
+handler({'body': '{"foo": "bar"}'}, object())
+```
+
+If you don't pass a request schema, it will validate from the name of the function
+
+I was inspired by `dschep <https://github.com/dschep>`_
+
+## Log Api
 
 Prerequisites:
 --------------
@@ -68,8 +115,7 @@ CREATE TABLE `LOG_APIS` (
 
 ```
 
-Usage:
-------
+### Usage
 ```python
 from aws_handler_decorators import (
     async_handler, cors_headers, dump_json_body, json_http_resp, json_schema_validator,
@@ -84,5 +130,4 @@ from Log_Api import log_resquest_response
 See each individual decorators for specific usage details and the example_
 for some more use cases. This library is also meant to serve as an example for how to write
 decorators for use as lambda middleware.
-
-I was inspired by `dschep <https://github.com/dschep>`_
+```
