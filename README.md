@@ -75,9 +75,9 @@ Prerequisites:
 --------------
 
 * Python 3.6+
-* A secret for database connection in AWS Secrets Manager with the following structure:
-`stage/dbr{APP}` (stage is the environment, for example: dev, qa, prod)
-`stage/dbw{APP}` (stage is the environment, for example: dev, qa, prod)
+* A secret for database connection in AWS Secrets Manager with the following structure:\
+`stage/dbr{APP}` (stage is the environment, for example: dev, qa, prod)\
+`stage/dbw{APP}` (stage is the environment, for example: dev, qa, prod)\
 `APP` (name of the application)\
 **Example:** dev/dbr-myapp, pdn/dbw-myapp\
 The APP is equal to -myapp and environment variable must be set in the serverless environment section.
