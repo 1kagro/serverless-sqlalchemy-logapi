@@ -76,7 +76,6 @@ def __response(request, response):
     response: dict
         Response of the API
     """
-    print(response)
     session = Database('dbw').session
     try:
         if response:

@@ -3,13 +3,16 @@ import json
 import boto3
 import base64
 import logging
+from datetime import datetime
 from botocore.exceptions import NoCredentialsError
 from botocore.exceptions import ClientError
 
 class Aws:
 
-    @classmethod
-    def get_secret(cls, name='secret-fcc'):
+    def __init__(self, secret_name: str):
+        self.__secret_name = secret_name
+    
+    def get_secret(self):
         """
         Obtener secreto
         param: str
@@ -17,18 +20,13 @@ class Aws:
         """
         stage = os.getenv('STAGE')
 
-        secretname = f'{stage}/{name}'
+        secret_name = f'{stage}/{self.__secret_name}'
 
-        # session = boto3.session.Session()
-        # client = session.client(
-        #     service_name='secretsmanager',
-        #     region_name=os.getenv('REGION')
-        # )
-        client = cls.get_client('secretsmanager')
+        client = self.get_client('secretsmanager')
 
         try:
             secret_request = client.get_secret_value(
-                SecretId=secretname
+                SecretId=secret_name
             )
         except client.exceptions.ResourceNotFoundException as e:
             raise ValueError(f"No se encontró el secreto {e}")
@@ -51,7 +49,7 @@ class Aws:
         return json.loads(secret)
 
     @classmethod
-    def get_client(cls, service_name: str, credentials: dict = None):
+    def get_client(cls, service_name: str, credentials: dict = {}):
         """
         Obtener cliente de aws
         param: service_name
@@ -70,8 +68,8 @@ class Aws:
         client = session.client(
             service_name=service_name,
             region_name=os.getenv('REGION'),
-            aws_access_key_id=credentials['accessKey'] if credentials else None,
-            aws_secret_access_key=credentials['secretKey'] if credentials else None,
+            aws_access_key_id=credentials.get('accessKey', None),
+            aws_secret_access_key=credentials.get('secretKey', None),
         )
 
         return client
@@ -100,24 +98,44 @@ class Aws:
             InvocationType=inv_type
         )
 
+        if inv_type == 'RequestResponse':
+            response = cls.get_data_from_response(response)
         return response
 
     @classmethod
-    def funciton_name(cls, function: str, service: str, stage=os.getenv('STAGE'), app='allianz-fcc'):
+    def get_data_from_response(cls, response):
+        """
+        Obtener datos de la respuesta de la función lambda
+        :param: response
+            respuesta de la función lambda
+        :return: data
+        """
+        response_document = response['Payload'].read().decode('utf-8')
+        response_document = json.loads(response_document)
+        response_body = json.loads(response_document['body'])
+
+        return response_body
+    
+    @classmethod
+    def function_name(cls, function: str, service: str='', stage=os.getenv('STAGE'), ext_app=False):
         """
         Crea nombre de función lambda
         :param: function
             nombre de la función
         :param: stage
             nombre del stage
-        :param: app
-            nombre de la aplicación
+        :param: ext_app
+            si es una aplicación externa
         :return: function_name
         """
-        return f"{app}-{service}-{stage}-{function}"
+        if ext_app == False:
+            service = os.getenv('SERVICE', '')
+        
+        if service == '':
+            raise Exception("No se ha definido el nombre del servicio en la variable de entorno SERVICE")
+        return f"{service}-{stage}-{function}"
     
-    @classmethod
-    def put_in_s3(cls, file_name: str, file_path: str):
+    def put_in_s3(self, file_name: str, file_path: str):
         """
         Subir archivo a S3
         :param: file_name
@@ -129,7 +147,7 @@ class Aws:
         """
         
         # Get S3 info
-        secrets = Aws.get_secret()
+        secrets = self.get_secret()
 
         # S3 Bucket Name
         bucket_name = secrets["bucket_name"]
@@ -146,8 +164,7 @@ class Aws:
         except Exception as e:
             raise e
     
-    @classmethod
-    def delete_s3_file(cls, file_path: str):
+    def delete_s3_file(self, file_path: str):
         """
         Eliminar archivo de S3
         :param: file_path
@@ -155,7 +172,7 @@ class Aws:
                 carpeta/nombre_archivo.extension
         """
         # Get S3 info
-        secrets = Aws.get_secret()
+        secrets = self.get_secret()
 
         # S3 Bucket Name
         bucket_name = secrets["bucket_name"]
@@ -167,6 +184,31 @@ class Aws:
             s3_client.delete_object(Bucket=bucket_name, Key=file_path)
         except FileNotFoundError:
             raise ValueError("Error al eliminar el archivo")
+        except NoCredentialsError:
+            raise ValueError("Credenciales invalidas")
+        except Exception as e:
+            raise e
+    
+    def upload_fileobj(self, file_route, filename):
+        """
+        Subir archivo a S3
+        :param: file 
+            archivo a subir (BufferedReader)
+        :param: filename
+            nombre del archivo, debe tener esta estructura:
+                carpeta/nombre_archivo.extension
+        """
+        try:
+            filename = f"{datetime.now().strftime('%d-%m-%Y')}_{filename}"
+            secrets = self.get_secret()
+
+            bucket_name = secrets["bucket_name"]
+
+            s3_client = boto3.client('s3')
+            with open(file_route, 'rb') as file:
+                s3_client.upload_fileobj(file, bucket_name, filename)
+        except FileNotFoundError:
+            raise ValueError("Error al guardar el archivo")
         except NoCredentialsError:
             raise ValueError("Credenciales invalidas")
         except Exception as e:
@@ -191,8 +233,7 @@ class Aws:
             return None
         return response
 
-    @classmethod
-    def create_presigned_url(cls, object_name, expiration=7257600):
+    def create_presigned_url(self, object_name, expiration=7257600):
         """Generate a presigned URL to share an S3 object
 
         :param bucket_name: string
@@ -201,7 +242,7 @@ class Aws:
         :return: Presigned URL as string. If error, returns None.
         """
         # Get S3 info
-        secrets = Aws.get_secret()
+        secrets = self.get_secret()
 
         # S3 Bucket Name
         bucket_name = secrets["bucket_name"]

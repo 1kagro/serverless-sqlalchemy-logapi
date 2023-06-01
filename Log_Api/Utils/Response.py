@@ -1,6 +1,4 @@
 import json
-
-# Clase encargada de dar la respuesta aws
 class Response:
 
     @classmethod
@@ -28,12 +26,14 @@ class Response:
         return cls.aws(data)
 
     @classmethod
-    def success(cls, data: list = [], message: str = 'Petición exitosa'):
+    def success(cls, data: list = [], message: str = 'Petición exitosa', pagination: dict = {}):
         response = {
             'statusCode': 200,
             'data': data,
             'message': message
         }
+        if pagination:
+            response['pagination'] = pagination
         return cls.aws(response)
 
     @classmethod

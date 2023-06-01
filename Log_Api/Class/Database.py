@@ -1,10 +1,10 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.pool import QueuePool, NullPool
-# from utils.Secrets import Secretos
-from Utils.Aws import Aws
-import json
+
+from ..Utils import Aws
 
 #Excepciones
 from sqlalchemy.exc import IntegrityError
@@ -12,9 +12,8 @@ from sqlalchemy.orm.exc import FlushError
 
 base_class = declarative_base()  # Extend class for models
 
-
 class Database():
-
+    
     # Mode can be:
     # dbr: Mode Read
     # dbw: Mode Write
@@ -23,7 +22,7 @@ class Database():
             raise Warning("El modo de uso de base de datos no es válido.")
 
         try:
-            connection_data = Aws.get_secret(f'{mode}-fcc')
+            connection_data = Aws(f'{mode}{os.getenv("APP", "")}').get_secret()
 
             # Get connections strings from secret manager
             __connection_strings = self.__get_connection_strings(
