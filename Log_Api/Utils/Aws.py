@@ -9,10 +9,8 @@ from botocore.exceptions import ClientError
 
 class Aws:
 
-    def __init__(self, secret_name: str):
-        self.__secret_name = secret_name
-    
-    def get_secret(self):
+    @classmethod
+    def get_secret(cls, secret_name: str):
         """
         Obtener secreto
         param: str
@@ -20,9 +18,9 @@ class Aws:
         """
         stage = os.getenv('STAGE')
 
-        secret_name = f'{stage}/{self.__secret_name}'
+        secret_name = f'{stage}/{secret_name}'
 
-        client = self.get_client('secretsmanager')
+        client = cls.get_client('secretsmanager')
 
         try:
             secret_request = client.get_secret_value(
@@ -135,7 +133,7 @@ class Aws:
             raise Exception("No se ha definido el nombre del servicio en la variable de entorno SERVICE")
         return f"{service}-{stage}-{function}"
     
-    def put_in_s3(self, file_name: str, file_path: str):
+    def put_in_s3(self, file_name: str, file_path: str, bucket_name: str):
         """
         Subir archivo a S3
         :param: file_name
@@ -146,12 +144,6 @@ class Aws:
         :return: s3_path_file
         """
         
-        # Get S3 info
-        secrets = self.get_secret()
-
-        # S3 Bucket Name
-        bucket_name = secrets["bucket_name"]
-
 
         s3_client = boto3.client('s3')
 
@@ -164,18 +156,14 @@ class Aws:
         except Exception as e:
             raise e
     
-    def delete_s3_file(self, file_path: str):
+    @classmethod
+    def delete_s3_file(cls, file_path: str, bucket_name: str):
         """
         Eliminar archivo de S3
         :param: file_path
             ruta del archivo, debe tener esta estructura:
                 carpeta/nombre_archivo.extension
         """
-        # Get S3 info
-        secrets = self.get_secret()
-
-        # S3 Bucket Name
-        bucket_name = secrets["bucket_name"]
         
         # Put object to bucket
         s3_client = boto3.client('s3')
@@ -189,7 +177,8 @@ class Aws:
         except Exception as e:
             raise e
     
-    def upload_fileobj(self, file_route, filename):
+    @classmethod
+    def upload_fileobj(cls, file_route, filename, bucket_name):
         """
         Subir archivo a S3
         :param: file 
@@ -200,9 +189,6 @@ class Aws:
         """
         try:
             filename = f"{datetime.now().strftime('%d-%m-%Y')}_{filename}"
-            secrets = self.get_secret()
-
-            bucket_name = secrets["bucket_name"]
 
             s3_client = boto3.client('s3')
             with open(file_route, 'rb') as file:

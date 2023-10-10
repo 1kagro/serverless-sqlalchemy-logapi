@@ -26,7 +26,7 @@ except NameError:
 
 logger = logging.getLogger(__name__)
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 class AwsHandlerDecorator(object):
     def __init__(self, func):
